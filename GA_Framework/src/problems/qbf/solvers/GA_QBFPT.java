@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
-
 import solutions.Solution;
 import triple.Triple;
 import triple.TripleElement;
@@ -130,8 +128,9 @@ public class GA_QBFPT extends GA_QBF {
 			if(chromosome.get(candToFix.get(0)) == 1 && chromosome.get(candToFix.get(1)) == 1 && chromosome.get(candToFix.get(2)) == 1)
 			{
 				Collections.shuffle(candToFix);
+				chromosome.set(candToFix.get(0), 0);
 			}
-			chromosome.set(candToFix.get(0), 0);
+			
 		}
 	}
 	
