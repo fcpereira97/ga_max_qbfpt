@@ -12,18 +12,26 @@ public class GA_QBFPT extends GA_QBF {
     public static final int STEADY_STATE  = 2;
     public static final int LATIN_HYPERCUBE = 3;
     private final int gaStrategie;
+    private final int generationsLimit;
+    private final int timeLimit;
+    private final int valueLimit;
+
 
 	/**
 	 * List of prohibited triples.
 	 */
 	private ArrayList<ArrayList<Integer>> triples;
 
-	public GA_QBFPT(Integer generations, Integer popSize, Double mutationRate, String filename, int gaStrategie) throws IOException {
-		super(generations, popSize, mutationRate, filename);
+	public GA_QBFPT(Integer generationsLimit, int timeLimit, int valueLimit, Integer popSize, Double mutationRate, String filename, int gaStrategie) throws IOException {
+		super(generationsLimit, popSize, mutationRate, filename);
 		// TODO Auto-generated constructor stub
 
 		this.triples = new ArrayList<ArrayList<Integer>>();
 		this.gaStrategie = gaStrategie;
+		this.generationsLimit = generationsLimit;
+		this.timeLimit = timeLimit;
+		this.valueLimit = valueLimit;
+
 	}
 
 	/**
@@ -106,6 +114,9 @@ public class GA_QBFPT extends GA_QBF {
 	 */
 	@Override
 	public Solution<Integer> solve() {
+		long beginTime = System.currentTimeMillis();
+		double partialTime =  ((double)(System.currentTimeMillis() - beginTime) / 1000) / 60;
+		int g = 1;
 
 		/* starts the initial population */
 		Population population = initializePopulation();
@@ -113,11 +124,12 @@ public class GA_QBFPT extends GA_QBF {
 		bestChromosome = getBestChromosome(population);
 		bestSol = decode(bestChromosome);
 		System.out.println("(Gen. " + 0 + ") BestSol = " + bestSol);
-
+		
+		
 		/*
 		 * enters the main loop and repeats until a given number of generations
 		 */
-		for (int g = 1; g <= generations; g++) {
+		while(g < this.generationsLimit && partialTime < this.timeLimit && bestSol.cost < this.valueLimit) {
 
 			Population parents = selectParents(population);
 
@@ -140,7 +152,9 @@ public class GA_QBFPT extends GA_QBF {
 				if (verbose)
 					System.out.println("(Gen. " + g + ") BestSol = " + bestSol);
 			}
-
+			
+			partialTime =  ((double)(System.currentTimeMillis() - beginTime) / 1000) / 60;
+			g++;
 		}
 
 		return bestSol;

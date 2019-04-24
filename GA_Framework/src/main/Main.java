@@ -16,8 +16,8 @@ public class Main {
     
     // Instances
     public static final String[] FILES_LIST = new String[]{
-        "instances/qbf020",
-    	//"instances/qbf040",
+        //"instances/qbf020",
+    	"instances/qbf040",
     	//"instances/qbf060",
         //"instances/qbf080",
        // "instances/qbf100",
@@ -31,44 +31,43 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		outputCsv = "fileName,config,valueSol,tempExec\n";
+		outputCsv = "fileName,config,valueSol,tempExec, sol\n";
         
         // Configurations
         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
-        executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
-        executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
-        executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
-        executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
+         executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
+        // executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
+        // executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
         
         saveOutput("output.csv", outputCsv); // Setting the name of the output file
 	}
 	
     private static void executeGA(int popSize, double mutationRate, int gaStrategie, String configuration) throws IOException
-    {
-    	long beginTotalTime = System.currentTimeMillis();
-    	
+    {    	
     	// Iterating over files
         for (String file : FILES_LIST) {
         	if(file.equals("instances/qbf020")) {
-        		valueLimit = -125;
+        		valueLimit = 125;
         	} else if(file.equals("instances/qbf040")) {
-        		valueLimit = -366;
+        		valueLimit = 366;
         	} else if(file.equals("instances/qbf060")) {
-        		valueLimit = -576;
+        		valueLimit = 576;
         	} else if(file.equals("instances/qbf080")) {
-        		valueLimit = -1000;
+        		valueLimit = 1000;
     		} else if(file.equals("instances/qbf100")) {
-        		valueLimit = -1539;
+        		valueLimit = 1539;
     		} else if(file.equals("instances/qbf200")) {
-        		valueLimit = -5826;
+        		valueLimit = 5826;
     		}else if(file.equals("instances/qbf400")) {
-        		valueLimit = -16625;
+        		valueLimit = 16625;
     		}
 
             //Print configurations of the execution
             System.out.println("Executing GA for file: " + file);
-            System.out.println("Configuration:");
+            System.out.println(" Configuration = " + configuration);
             printGaStrategie (gaStrategie);
+            System.out.println("Population = " + popSize + "\n Mutation rate = " + mutationRate);
             printStopCriterion();
 
             // Executing GA
@@ -78,7 +77,7 @@ public class Main {
             
             // Setting configurations parameters
             // tenure is defined by the ternurePercent * size
-            GA_QBFPT ga = new GA_QBFPT(generationsLimit, popSize, mutationRate, "instances/qbf020", gaStrategie);
+            GA_QBFPT ga = new GA_QBFPT(generationsLimit, timeLimit, valueLimit, popSize, mutationRate, file, gaStrategie);
             ga.generateTriples();
             Solution<Integer> bestSolution = ga.solve(); // Starting solve model
             
@@ -92,15 +91,11 @@ public class Main {
             
             // Add info to output csv file
             outputCsv += file + "," + configuration + ","
-                     + bestSolution.cost + "," + (double)totalInstanceTime / 1000 + "\n";
+                     + bestSolution.cost + "," + (double)totalInstanceTime / 1000 + ", \"" + bestSolution + "\"\n";
 
         }
 
-        // Calculating time of all executions
-        long totalTime = System.currentTimeMillis() - beginTotalTime;
-
-        System.out.println("Execution time for all files: " + (totalTime / 1000D) + "seg \n"
-                + "----------------------------------------------------- \n \n");
+        System.out.println("----------------------------------------------------- \n \n");
     }
 	
 	// Print GA strategy
@@ -128,7 +123,7 @@ public class Main {
         if(generationsLimit <= 0)
         	resp += generationsLimit + " generations";
         
-        if (timeLimit > 0) {
+        else if (timeLimit > 0) {
             resp +=  timeLimit + " minutes";
         }
 
