@@ -103,6 +103,42 @@ public class GA_QBFPT extends GA_QBF {
 			}
 		}
 	}
+	
+	protected Population initializePopulationLatinHypercube() {
+
+		Population population = new Population();
+		int qntGenes = ObjFunction.getDomainSize();
+		int i = 0;
+		
+		ArrayList<Integer> column = new ArrayList<Integer>();
+		while(i < popSize/2)
+		{
+			column.add(0);
+			i++;
+		}
+		
+		while(i < popSize)
+		{
+			column.add(1);
+			i++;
+		}
+		
+		i = 0;
+		while (i < popSize) {
+			population.add(new Chromosome());
+			i++;
+		}
+		
+		for(i = 0; i < qntGenes; i++)
+		{
+			Collections.shuffle(column);
+			for(int j = 0; j < popSize; j++)
+			{
+				(population.get(j)).add(column.get(j));
+			}
+		}
+		return population;
+	}
 
 	/**
 	 * The GA mainframe. It starts by initializing a population of chromosomes. It
@@ -117,9 +153,13 @@ public class GA_QBFPT extends GA_QBF {
 		long beginTime = System.currentTimeMillis();
 		double partialTime =  ((double)(System.currentTimeMillis() - beginTime) / 1000) / 60;
 		int g = 1;
+		Population population;
 
 		/* starts the initial population */
-		Population population = initializePopulation();
+		if(gaStrategie == GA_QBFPT.LATIN_HYPERCUBE)
+			population = initializePopulationLatinHypercube(); 
+		else
+			population = initializePopulation();
 
 		bestChromosome = getBestChromosome(population);
 		bestSol = decode(bestChromosome);

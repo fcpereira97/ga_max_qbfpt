@@ -10,7 +10,7 @@ import solutions.Solution;
 public class Main {
 
     public static int timeLimit = 30; // Max time in minutes
-    public static int generationsLimit = 10000; // Max generations (negative values for not using generations limit)
+    public static int generationsLimit = 10000; // Max generations (use MAX_INT to disable)
     public static int valueLimit; // Value limit to stop iterations
     public static String outputCsv; // Output name file
     
@@ -34,11 +34,11 @@ public class Main {
 		outputCsv = "fileName,config,valueSol,tempExec, sol\n";
         
         // Configurations
-        executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
          executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
         // executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
-        // executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
         
         saveOutput("output.csv", outputCsv); // Setting the name of the output file
 	}
