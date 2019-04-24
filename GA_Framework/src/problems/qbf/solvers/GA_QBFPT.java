@@ -6,17 +6,24 @@ import java.util.Collections;
 import solutions.Solution;
 
 public class GA_QBFPT extends GA_QBF {
+	
+    // GA strategies
+    public static final int STANDARD = 1;
+    public static final int STEADY_STATE  = 2;
+    public static final int LATIN_HYPERCUBE = 3;
+    private final int gaStrategie;
 
 	/**
 	 * List of prohibited triples.
 	 */
 	private ArrayList<ArrayList<Integer>> triples;
 
-	public GA_QBFPT(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
+	public GA_QBFPT(Integer generations, Integer popSize, Double mutationRate, String filename, int gaStrategie) throws IOException {
 		super(generations, popSize, mutationRate, filename);
 		// TODO Auto-generated constructor stub
 
-		triples = new ArrayList<ArrayList<Integer>>();
+		this.triples = new ArrayList<ArrayList<Integer>>();
+		this.gaStrategie = gaStrategie;
 	}
 
 	/**
