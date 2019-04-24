@@ -17,12 +17,12 @@ public class Main {
     // Instances
     public static final String[] FILES_LIST = new String[]{
         //"instances/qbf020",
-    	"instances/qbf040",
+    	//"instances/qbf040",
     	//"instances/qbf060",
-        //"instances/qbf080",
-       // "instances/qbf100",
+        "instances/qbf080",
+        //"instances/qbf100",
         //"instances/qbf200",
-       // "instances/qbf400"
+        //"instances/qbf400"
     };
     
 	/**
@@ -35,10 +35,10 @@ public class Main {
         
         // Configurations
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
-         executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
-         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
-        // executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
-         executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
+        // executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
+        // executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
+         //executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
         
         saveOutput("output.csv", outputCsv); // Setting the name of the output file
 	}
@@ -78,6 +78,7 @@ public class Main {
             // Setting configurations parameters
             // tenure is defined by the ternurePercent * size
             GA_QBFPT ga = new GA_QBFPT(generationsLimit, timeLimit, valueLimit, popSize, mutationRate, file, gaStrategie);
+            ga.verbose = false;
             ga.generateTriples();
             Solution<Integer> bestSolution = ga.solve(); // Starting solve model
             

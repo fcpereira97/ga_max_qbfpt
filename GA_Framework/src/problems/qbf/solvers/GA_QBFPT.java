@@ -3,6 +3,11 @@ package problems.qbf.solvers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import com.sun.xml.internal.ws.api.pipe.NextAction;
+
+import metaheuristics.ga.AbstractGA.Chromosome;
+import metaheuristics.ga.AbstractGA.Population;
 import solutions.Solution;
 
 public class GA_QBFPT extends GA_QBF {
@@ -172,19 +177,23 @@ public class GA_QBFPT extends GA_QBF {
 		while(g < this.generationsLimit && partialTime < this.timeLimit && bestSol.cost < this.valueLimit) {
 
 			Population parents = selectParents(population);
-
+			//System.out.println("Parents: "+parents.size());
 			Population offsprings = crossover(parents);
-			for (Chromosome chromosome : offsprings)
+			for (Chromosome chromosome : offsprings) {
 				fixChromosome(chromosome);
-
+			}
 			Population mutants = mutate(offsprings);
-			for (Chromosome chromosome : mutants)
+			for (Chromosome chromosome : mutants) {
 				fixChromosome(chromosome);
-
+			}
 			Population newpopulation = selectPopulation(mutants);
+			
+			if(gaStrategie == GA_QBFPT.STEADY_STATE) {
+				newpopulation = selectParentsSteadyState(newpopulation);
+			}
 
 			population = newpopulation;
-
+			
 			bestChromosome = getBestChromosome(population);
 
 			if (fitness(bestChromosome) > bestSol.cost) {
@@ -198,5 +207,63 @@ public class GA_QBFPT extends GA_QBF {
 		}
 
 		return bestSol;
+	}
+	
+	public Population selectParentsSteadyState(Population population) {
+
+		/*
+		 * Selecionando dois pais distintos aleatoriamente
+		 */
+		int index1 = rng.nextInt(popSize);
+		Chromosome parent1 = population.get(index1);
+		int index2 = rng.nextInt(popSize);
+		while(index1 == index2) {
+			index2 = rng.nextInt(popSize);
+		}
+		Chromosome parent2 = population.get(index2);
+		
+		/*
+		 * Gerando os dois filhos
+		 */
+		int crosspoint1 = rng.nextInt(chromosomeSize + 1);
+		int crosspoint2 = crosspoint1 + rng.nextInt((chromosomeSize + 1) - crosspoint1);
+
+		Chromosome offspring1 = new Chromosome();
+		Chromosome offspring2 = new Chromosome();
+
+		for (int j = 0; j < chromosomeSize; j++) {
+			if (j >= crosspoint1 && j < crosspoint2) {
+				offspring1.add(parent2.get(j));
+				offspring2.add(parent1.get(j));
+			} else {
+				offspring1.add(parent1.get(j));
+				offspring2.add(parent2.get(j));
+			}
+		}
+
+		/*
+		 * Corrigindo os filhos
+		 */
+		fixChromosome(offspring1);
+		fixChromosome(offspring2);
+		/*
+		 * Escolhendo o melhor filho
+		 */
+		Chromosome bestoffspring = new Chromosome();
+		if(fitness(offspring1) > fitness(offspring2)) {
+			bestoffspring = offspring1;
+		}else {
+			bestoffspring = offspring2;
+		}
+		/*
+		 * Analisando se deve entrar na solução
+		 */
+		Chromosome worse = getWorseChromosome(population);
+		if (fitness(worse) < fitness(bestoffspring)) {
+			population.remove(worse);
+			population.add(bestChromosome);
+		}
+		return population;
+		
 	}
 }
