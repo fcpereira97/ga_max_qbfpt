@@ -10,19 +10,19 @@ import solutions.Solution;
 public class Main {
 
     public static int timeLimit = 30; // Max time in minutes
-    public static int generationsLimit = 10000; // Max generations (use MAX_INT to disable)
+    public static int generationsLimit = 1000000; // Max generations (use MAX_INT to disable)
     public static int valueLimit; // Value limit to stop iterations
     public static String outputCsv; // Output name file
     
     // Instances
     public static final String[] FILES_LIST = new String[]{
-        //"instances/qbf020",
-    	//"instances/qbf040",
-    	//"instances/qbf060",
+        "instances/qbf020",
+    	"instances/qbf040",
+    	"instances/qbf060",
         "instances/qbf080",
-        //"instances/qbf100",
-        //"instances/qbf200",
-        //"instances/qbf400"
+        "instances/qbf100",
+        "instances/qbf200",
+        "instances/qbf400"
     };
     
 	/**
@@ -34,13 +34,23 @@ public class Main {
 		outputCsv = "fileName,config,valueSol,tempExec, sol\n";
         
         // Configurations
+		/*
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
-        // executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
-        // executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
+         saveOutput("outputP.csv", outputCsv);
+         
+         executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
+         saveOutput("outputA.csv", outputCsv);
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
+         saveOutput("outputB.csv", outputCsv);
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
-         //executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
-        
-        saveOutput("output.csv", outputCsv); // Setting the name of the output file
+         saveOutput("outputC.csv", outputCsv);
+         */
+		executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
+        saveOutput("outputD.csv", outputCsv);
+         /*
+         
+          // Setting the name of the output file
+         */
 	}
 	
     private static void executeGA(int popSize, double mutationRate, int gaStrategie, String configuration) throws IOException
@@ -78,7 +88,6 @@ public class Main {
             // Setting configurations parameters
             // tenure is defined by the ternurePercent * size
             GA_QBFPT ga = new GA_QBFPT(generationsLimit, timeLimit, valueLimit, popSize, mutationRate, file, gaStrategie);
-            ga.verbose = false;
             ga.generateTriples();
             Solution<Integer> bestSolution = ga.solve(); // Starting solve model
             
