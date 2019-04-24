@@ -2,143 +2,98 @@ package problems.qbf.solvers;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-
 import solutions.Solution;
-import triple.Triple;
-import triple.TripleElement;
 
 public class GA_QBFPT extends GA_QBF {
-	
-	/**
-     * List of element objects used in prohibited triples. These objects
-     * represents the variables of the model.
-     */
-    private TripleElement[] tripleElements;
 
-    /**
-     * List of prohibited triples.
-     */
-    private Triple[] triples; 
+	/**
+	 * List of prohibited triples.
+	 */
+	private ArrayList<ArrayList<Integer>> triples;
 
 	public GA_QBFPT(Integer generations, Integer popSize, Double mutationRate, String filename) throws IOException {
 		super(generations, popSize, mutationRate, filename);
 		// TODO Auto-generated constructor stub
-		
-		generateTripleElements();
-        generateTriples();
+
+		triples = new ArrayList<ArrayList<Integer>>();
 	}
-	
 
-	
-    /**
-     * Linear congruent function l used to generate pseudo-random numbers.
-     */
-    public int l(int pi1, int pi2, int u, int n) {
-        return 1 + ((pi1 * u + pi2) % n);
-    }
-
-    /**
-     * Function g used to generate pseudo-random numbers
-     */
-    public int g(int u, int n) {
-        int pi1 = 131;
-        int pi2 = 1031;
-        int lU = l(pi1, pi2, u, n);
-
-        if (lU != u) {
-            return lU;
-        } else {
-            return 1 + (lU % n);
-        }
-    }
-
-    /**
-     * Function h used to generate pseudo-random numbers
-     */
-    public int h(int u, int n) {
-        int pi1 = 193;
-        int pi2 = 1093;
-        int lU = l(pi1, pi2, u, n);
-        int gU = g(u, n);
-
-        if (lU != u && lU != gU) {
-            return lU;
-        } else if ((1 + (lU % n)) != u && (1 + (lU % n)) != gU) {
-            return 1 + (lU % n);
-        } else {
-            return 1 + ((lU + 1) % n);
-        }
-    }
-	
 	/**
-    * Method that generates a list of n prohibited triples using l g and h
-    * functions
-    */
-   private void generateTriples() {
-       int n = ObjFunction.getDomainSize();
-       this.triples = new Triple[ObjFunction.getDomainSize()];
+	 * Linear congruent function l used to generate pseudo-random numbers.
+	 */
+	public int l(int pi1, int pi2, int u, int n) {
+		return 1 + ((pi1 * u + pi2) % n);
+	}
 
-       for (int u = 1; u <= n; u++) {
-           TripleElement te1, te2, te3;
-           Triple newTriple;
+	/**
+	 * Function g used to generate pseudo-random numbers
+	 */
+	public int g(int u, int n) {
+		int pi1 = 131;
+		int pi2 = 1031;
+		int lU = l(pi1, pi2, u, n);
 
-           te1 = tripleElements[u - 1];
-           te2 = tripleElements[g(u - 1, n) - 1];
-           te3 = tripleElements[h(u - 1, n) - 1];
-           newTriple = new Triple(te1, te2, te3);
-           
-           //Sorting new triple
-           Arrays.sort(newTriple.getElements(), Comparator.comparing(TripleElement::getIndex));
+		if (lU != u) {
+			return lU;
+		} else {
+			return 1 + (lU % n);
+		}
+	}
 
-           //newTriple.printTriple();
-           this.triples[u-1] = newTriple;
-       }
-   }
-   
+	/**
+	 * Function h used to generate pseudo-random numbers
+	 */
+	public int h(int u, int n) {
+		int pi1 = 193;
+		int pi2 = 1093;
+		int lU = l(pi1, pi2, u, n);
+		int gU = g(u, n);
 
-   /**
-    * That method generates a list of objects (Triple Elements) that represents
-    * each binary variable that could be inserted into a prohibited triple
-    */
-	private void generateTripleElements() {
-       int n = ObjFunction.getDomainSize();
-       this.tripleElements = new TripleElement[n];
+		if (lU != u && lU != gU) {
+			return lU;
+		} else if ((1 + (lU % n)) != u && (1 + (lU % n)) != gU) {
+			return 1 + (lU % n);
+		} else {
+			return 1 + ((lU + 1) % n);
+		}
+	}
 
-       for (int i = 0; i < n; i++) {
-           tripleElements[i] = new TripleElement(i);
-       }
-   }
-	
-	public void fixChromosome(Chromosome chromosome)
-	{
-		ArrayList<Triple> triplesCopy = new ArrayList<Triple>(Arrays.asList(triples));
-		Collections.shuffle(triplesCopy);
-		
-		for(Triple triple : triplesCopy)
-		{
-			ArrayList<Integer> candToFix = new ArrayList<Integer>();
+	public void generateTriples() {
+		int n = ObjFunction.getDomainSize();
+		for (int u = 1; u <= n; u++) {
+			ArrayList<Integer> triple = new ArrayList<Integer>();
+			triple.add(u - 1);
+			triple.add(g(u-1, n) - 1);
+			triple.add(h(u - 1, n) - 1);
 			
-			candToFix.add((triple.getElements()[0]).getIndex());
-			candToFix.add((triple.getElements()[1]).getIndex());
-			candToFix.add((triple.getElements()[2]).getIndex());
-
-			if(chromosome.get(candToFix.get(0)) == 1 && chromosome.get(candToFix.get(1)) == 1 && chromosome.get(candToFix.get(2)) == 1)
-			{
-				Collections.shuffle(candToFix);
-				chromosome.set(candToFix.get(0), 0);
-			}
+			// Sorting new triple
+			Collections.sort(triple);
 			
+			//Print triples
+			//System.out.println(triple.get(0) + " " + triple.get(1) + " " + triple.get(2));
+			
+			// Adding to triples array
+			this.triples.add(triple);
 		}
 	}
 	
+	public void fixChromosome(Chromosome chromosome) {
+		Collections.shuffle(triples);
+		for (ArrayList<Integer> triple : triples) {
+			if (chromosome.get(triple.get(0)) == 1 && chromosome.get(triple.get(1)) == 1
+					&& chromosome.get(triple.get(2)) == 1) {
+				int randIndex = rng.nextInt(3);
+				chromosome.set(triple.get(randIndex), 0);
+			}
+		}
+	}
+
 	/**
-	 * The GA mainframe. It starts by initializing a population of chromosomes.
-	 * It then enters a generational loop, in which each generation goes the
-	 * following steps: parent selection, crossover, mutation, population update
-	 * and best solution update.
+	 * The GA mainframe. It starts by initializing a population of chromosomes. It
+	 * then enters a generational loop, in which each generation goes the following
+	 * steps: parent selection, crossover, mutation, population update and best
+	 * solution update.
 	 * 
 	 * @return The best feasible solution obtained throughout all iterations.
 	 */
@@ -160,11 +115,11 @@ public class GA_QBFPT extends GA_QBF {
 			Population parents = selectParents(population);
 
 			Population offsprings = crossover(parents);
-			for(Chromosome chromosome : offsprings)
+			for (Chromosome chromosome : offsprings)
 				fixChromosome(chromosome);
-				
+
 			Population mutants = mutate(offsprings);
-			for(Chromosome chromosome : mutants)
+			for (Chromosome chromosome : mutants)
 				fixChromosome(chromosome);
 
 			Population newpopulation = selectPopulation(mutants);
