@@ -10,14 +10,14 @@ import solutions.Solution;
 public class Main {
 
     public static int timeLimit = 30; // Max time in minutes
-    public static int generationsLimit = 1000000; // Max generations (use MAX_INT to disable)
+    public static int generationsLimit = 50000; // Max generations (use MAX_INT to disable)
     public static int valueLimit; // Value limit to stop iterations
     public static String outputCsv; // Output name file
     
     // Instances
     public static final String[] FILES_LIST = new String[]{
-        "instances/qbf020",
-    	"instances/qbf040",
+        //"instances/qbf020",
+    	//"instances/qbf040",
     	"instances/qbf060",
         "instances/qbf080",
         "instances/qbf100",
@@ -36,21 +36,21 @@ public class Main {
         // Configurations
 		/*
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "P");
-         saveOutput("outputP.csv", outputCsv);
+         saveOutput("outputP2.csv", outputCsv);
          
          executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
-         saveOutput("outputA.csv", outputCsv);
-         executeGA(100, 1.0 / 100.0, GA_QBFPT.STANDARD, "B");
-         saveOutput("outputB.csv", outputCsv);
+         saveOutput("outputA2.csv", outputCsv);
+         executeGA(100, 2.0 / 100.0, GA_QBFPT.STANDARD, "B");
+         saveOutput("outputB2.csv", outputCsv);
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
-         saveOutput("outputC.csv", outputCsv);
+         saveOutput("outputC2.csv", outputCsv);
          */
 		executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
-        saveOutput("outputD.csv", outputCsv);
-         /*
+        saveOutput("outputD3.csv", outputCsv);
+         
          
           // Setting the name of the output file
-         */
+         
 	}
 	
     private static void executeGA(int popSize, double mutationRate, int gaStrategie, String configuration) throws IOException
