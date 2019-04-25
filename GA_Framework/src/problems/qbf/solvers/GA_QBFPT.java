@@ -169,21 +169,21 @@ public class GA_QBFPT extends GA_QBF {
 	 * @param population
 	 * @return
 	 */
-	public Population selectParentsSteadyState(Population population) {
+	public Population selectParentsSteadyState(Population population, Population parents) {
 
 		/*
-		 * Selecionando dois pais distintos aleatoriamente
+		 * Selecting two distinct parents randomly
 		 */
 		int index1 = rng.nextInt(popSize);
-		Chromosome parent1 = population.get(index1);
+		Chromosome parent1 = parents.get(index1);
 		int index2 = rng.nextInt(popSize);
 		while(index1 == index2) {
 			index2 = rng.nextInt(popSize);
 		}
-		Chromosome parent2 = population.get(index2);
+		Chromosome parent2 = parents.get(index2);
 		
 		/*
-		 * Gerando os dois filhos
+		 * Generating two offsprings
 		 */
 		int crosspoint1 = rng.nextInt(chromosomeSize + 1);
 		int crosspoint2 = crosspoint1 + rng.nextInt((chromosomeSize + 1) - crosspoint1);
@@ -200,14 +200,23 @@ public class GA_QBFPT extends GA_QBF {
 				offspring2.add(parent2.get(j));
 			}
 		}
+		
+		// Mutating the offspring
+		Population offsprings = new Population();
+		offsprings.add(offspring1);
+		offsprings.add(offspring2);
+		offsprings = mutate(offsprings);
+		offspring1 = offsprings.get(0);
+		offspring2 = offsprings.get(1);
 
 		/*
-		 * Corrigindo os filhos
+		 * Fixing offsprings
 		 */
 		fixChromosome(offspring1);
 		fixChromosome(offspring2);
+		
 		/*
-		 * Escolhendo o melhor filho
+		 * Chosing the best oen
 		 */
 		Chromosome bestoffspring = new Chromosome();
 		if(fitness(offspring1) > fitness(offspring2)) {
@@ -215,13 +224,14 @@ public class GA_QBFPT extends GA_QBF {
 		}else {
 			bestoffspring = offspring2;
 		}
+		
 		/*
-		 * Analisando se deve entrar na solução
+		 * Inserting in the population
 		 */
 		Chromosome worse = getWorseChromosome(population);
 		if (fitness(worse) < fitness(bestoffspring)) {
 			population.remove(worse);
-			population.add(bestChromosome);
+			population.add(bestoffspring);
 		}
 		return population;
 		
@@ -260,18 +270,22 @@ public class GA_QBFPT extends GA_QBF {
 
 			Population parents = selectParents(population);
 			//System.out.println("Parents: "+parents.size());
-			Population offsprings = crossover(parents);
-			for (Chromosome chromosome : offsprings) {
-				fixChromosome(chromosome);
-			}
-			Population mutants = mutate(offsprings);
-			for (Chromosome chromosome : mutants) {
-				fixChromosome(chromosome);
-			}
-			Population newpopulation = selectPopulation(mutants);
+			Population newpopulation;
 			
-			if(gaStrategie == GA_QBFPT.STEADY_STATE) {
-				newpopulation = selectParentsSteadyState(newpopulation);
+			if(gaStrategie == GA_QBFPT.STEADY_STATE)
+			{
+				newpopulation = selectParentsSteadyState(population, parents);
+			} else {
+			
+				Population offsprings = crossover(parents);
+				for (Chromosome chromosome : offsprings) {
+					fixChromosome(chromosome);
+				}
+				Population mutants = mutate(offsprings);
+				for (Chromosome chromosome : mutants) {
+					fixChromosome(chromosome);
+				}
+				newpopulation = selectPopulation(mutants);
 			}
 
 			population = newpopulation;
