@@ -9,7 +9,7 @@ import solutions.Solution;
 
 public class Main {
 
-    public static int timeLimit = 30; // Max time in minutes
+    public static int timeLimit = 20; // Max time in minutes
     public static int generationsLimit = 50000; // Max generations (use MAX_INT to disable)
     public static int valueLimit; // Value limit to stop iterations
     public static String outputCsv; // Output name file
@@ -18,8 +18,8 @@ public class Main {
     public static final String[] FILES_LIST = new String[]{
         //"instances/qbf020",
     	//"instances/qbf040",
-    	"instances/qbf060",
-        "instances/qbf080",
+    	//"instances/qbf060",
+        //"instances/qbf080",
         "instances/qbf100",
         "instances/qbf200",
         "instances/qbf400"
@@ -40,13 +40,15 @@ public class Main {
          
          executeGA(200, 1.0 / 100.0, GA_QBFPT.STANDARD, "A");
          saveOutput("outputA2.csv", outputCsv);
-         executeGA(100, 2.0 / 100.0, GA_QBFPT.STANDARD, "B");
-         saveOutput("outputB2.csv", outputCsv);
+         
          executeGA(100, 1.0 / 100.0, GA_QBFPT.STEADY_STATE, "C");
          saveOutput("outputC2.csv", outputCsv);
+         executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
+         saveOutput("outputD3.csv", outputCsv);
          */
-		executeGA(100, 1.0 / 100.0, GA_QBFPT.LATIN_HYPERCUBE, "D");
-        saveOutput("outputD3.csv", outputCsv);
+		executeGA(100, 2.0 / 100.0, GA_QBFPT.STANDARD, "B");
+        saveOutput("outputB2g.csv", outputCsv);
+		
          
          
           // Setting the name of the output file
