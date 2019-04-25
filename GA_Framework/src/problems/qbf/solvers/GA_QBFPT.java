@@ -3,13 +3,14 @@ package problems.qbf.solvers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import com.sun.xml.internal.ws.api.pipe.NextAction;
-
-import metaheuristics.ga.AbstractGA.Chromosome;
-import metaheuristics.ga.AbstractGA.Population;
 import solutions.Solution;
 
+/**
+ * This class implements a genetic algorithm for QBFPT problem.
+ * 
+ * @author fcpereira97, deyvisonnogueira 
+ *
+ */
 public class GA_QBFPT extends GA_QBF {
 	
     // GA strategies
@@ -17,6 +18,8 @@ public class GA_QBFPT extends GA_QBF {
     public static final int STEADY_STATE  = 2;
     public static final int LATIN_HYPERCUBE = 3;
     private final int gaStrategie;
+    
+    // Stop criterion
     private final int generationsLimit;
     private final int timeLimit;
     private final int valueLimit;
@@ -79,6 +82,9 @@ public class GA_QBFPT extends GA_QBF {
 		}
 	}
 
+	/**
+	 * Method for generating prohibited triples
+	 */
 	public void generateTriples() {
 		int n = ObjFunction.getDomainSize();
 		for (int u = 1; u <= n; u++) {
@@ -98,6 +104,12 @@ public class GA_QBFPT extends GA_QBF {
 		}
 	}
 	
+	/**
+	 * If a given chromosome violates any prohibited triple, then
+	 * a random element from this triple is set to 0 in this chromosome
+	 * 
+	 * @param chromosome
+	 */
 	public void fixChromosome(Chromosome chromosome) {
 		Collections.shuffle(triples);
 		for (ArrayList<Integer> triple : triples) {
@@ -109,6 +121,13 @@ public class GA_QBFPT extends GA_QBF {
 		}
 	}
 	
+	/**
+	 * This method returns a new population based on Latin Hypercube strategie.
+	 * For QBFPT problem we have only 2 allele (0 or 1) per gene in a chromosome.
+	 * So in this case each column contains half 0s and half 1s in a random order;
+	 * 
+	 * @return A new population
+	 */
 	protected Population initializePopulationLatinHypercube() {
 
 		Population population = new Population();
@@ -144,6 +163,79 @@ public class GA_QBFPT extends GA_QBF {
 		}
 		return population;
 	}
+	
+	/**
+	 * 
+	 * @param population
+	 * @return
+	 */
+	public Population selectParentsSteadyState(Population population, Population parents) {
+
+		/*
+		 * Selecting two distinct parents randomly
+		 */
+		int index1 = rng.nextInt(popSize);
+		Chromosome parent1 = parents.get(index1);
+		int index2 = rng.nextInt(popSize);
+		while(index1 == index2) {
+			index2 = rng.nextInt(popSize);
+		}
+		Chromosome parent2 = parents.get(index2);
+		
+		/*
+		 * Generating two offsprings
+		 */
+		int crosspoint1 = rng.nextInt(chromosomeSize + 1);
+		int crosspoint2 = crosspoint1 + rng.nextInt((chromosomeSize + 1) - crosspoint1);
+
+		Chromosome offspring1 = new Chromosome();
+		Chromosome offspring2 = new Chromosome();
+
+		for (int j = 0; j < chromosomeSize; j++) {
+			if (j >= crosspoint1 && j < crosspoint2) {
+				offspring1.add(parent2.get(j));
+				offspring2.add(parent1.get(j));
+			} else {
+				offspring1.add(parent1.get(j));
+				offspring2.add(parent2.get(j));
+			}
+		}
+		
+		// Mutating the offspring
+		Population offsprings = new Population();
+		offsprings.add(offspring1);
+		offsprings.add(offspring2);
+		offsprings = mutate(offsprings);
+		offspring1 = offsprings.get(0);
+		offspring2 = offsprings.get(1);
+
+		/*
+		 * Fixing offsprings
+		 */
+		fixChromosome(offspring1);
+		fixChromosome(offspring2);
+		
+		/*
+		 * Chosing the best oen
+		 */
+		Chromosome bestoffspring = new Chromosome();
+		if(fitness(offspring1) > fitness(offspring2)) {
+			bestoffspring = offspring1;
+		}else {
+			bestoffspring = offspring2;
+		}
+		
+		/*
+		 * Inserting in the population
+		 */
+		Chromosome worse = getWorseChromosome(population);
+		if (fitness(worse) < fitness(bestoffspring)) {
+			population.remove(worse);
+			population.add(bestoffspring);
+		}
+		return population;
+		
+	}
 
 	/**
 	 * The GA mainframe. It starts by initializing a population of chromosomes. It
@@ -178,18 +270,22 @@ public class GA_QBFPT extends GA_QBF {
 
 			Population parents = selectParents(population);
 			//System.out.println("Parents: "+parents.size());
-			Population offsprings = crossover(parents);
-			for (Chromosome chromosome : offsprings) {
-				fixChromosome(chromosome);
-			}
-			Population mutants = mutate(offsprings);
-			for (Chromosome chromosome : mutants) {
-				fixChromosome(chromosome);
-			}
-			Population newpopulation = selectPopulation(mutants);
+			Population newpopulation;
 			
-			if(gaStrategie == GA_QBFPT.STEADY_STATE) {
-				newpopulation = selectParentsSteadyState(newpopulation);
+			if(gaStrategie == GA_QBFPT.STEADY_STATE)
+			{
+				newpopulation = selectParentsSteadyState(population, parents);
+			} else {
+			
+				Population offsprings = crossover(parents);
+				for (Chromosome chromosome : offsprings) {
+					fixChromosome(chromosome);
+				}
+				Population mutants = mutate(offsprings);
+				for (Chromosome chromosome : mutants) {
+					fixChromosome(chromosome);
+				}
+				newpopulation = selectPopulation(mutants);
 			}
 
 			population = newpopulation;
@@ -209,61 +305,5 @@ public class GA_QBFPT extends GA_QBF {
 		return bestSol;
 	}
 	
-	public Population selectParentsSteadyState(Population population) {
 
-		/*
-		 * Selecionando dois pais distintos aleatoriamente
-		 */
-		int index1 = rng.nextInt(popSize);
-		Chromosome parent1 = population.get(index1);
-		int index2 = rng.nextInt(popSize);
-		while(index1 == index2) {
-			index2 = rng.nextInt(popSize);
-		}
-		Chromosome parent2 = population.get(index2);
-		
-		/*
-		 * Gerando os dois filhos
-		 */
-		int crosspoint1 = rng.nextInt(chromosomeSize + 1);
-		int crosspoint2 = crosspoint1 + rng.nextInt((chromosomeSize + 1) - crosspoint1);
-
-		Chromosome offspring1 = new Chromosome();
-		Chromosome offspring2 = new Chromosome();
-
-		for (int j = 0; j < chromosomeSize; j++) {
-			if (j >= crosspoint1 && j < crosspoint2) {
-				offspring1.add(parent2.get(j));
-				offspring2.add(parent1.get(j));
-			} else {
-				offspring1.add(parent1.get(j));
-				offspring2.add(parent2.get(j));
-			}
-		}
-
-		/*
-		 * Corrigindo os filhos
-		 */
-		fixChromosome(offspring1);
-		fixChromosome(offspring2);
-		/*
-		 * Escolhendo o melhor filho
-		 */
-		Chromosome bestoffspring = new Chromosome();
-		if(fitness(offspring1) > fitness(offspring2)) {
-			bestoffspring = offspring1;
-		}else {
-			bestoffspring = offspring2;
-		}
-		/*
-		 * Analisando se deve entrar na solução
-		 */
-		Chromosome worse = getWorseChromosome(population);
-		if (fitness(worse) < fitness(bestoffspring)) {
-			population.remove(worse);
-			population.add(bestChromosome);
-		}
-		return population;
-		
-	}
 }
